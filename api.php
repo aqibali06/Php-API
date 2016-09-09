@@ -190,7 +190,43 @@
 					}
 			}
 
-		private function getImageCommment()
+		// getImageCommmentByUser
+		private function getImageCommmentByUser()
+		{
+			if($this->get_request_method() != "POST")
+			{
+				$res = array("status"=>"false" , "message" => "Request Method Not Allowed");
+				$this->response($this->json($res),405);
+			}
+
+			if(isset($this->_request['commentor_id'])
+				&& !empty($this->_request['commentor_id']))
+			{
+				$commentor_id = $this->_request['commentor_id'];
+				$query = mysqli_query($this->dbconnect(),"SELECT * FROM `image_comments` WHERE `commentor_id`='$commentor_id'");
+				if($rec = mysqli_fetch_array($query))
+				{
+					$res = array('image_id'=> $rec['image_id'],
+								 'commentor_id' => $rec['commentor_id'],
+								 'comment_txt' => $rec['comment_txt'],
+								 'created_at' => $rec['created_date']
+								 );
+					$this->response($this->json($res),200);
+				}
+				else
+				{
+					$res = array("status" => "false", "message"=>'Record Not Found');
+					$this->response($this->json($res),404);
+				}
+			}
+			else{
+				$res = array("status" => "false", "message"=>'Parameter Missing');
+				$this->response($this->json($res),200);
+			}
+		}
+
+		// getImageCommmentByUser
+		private function getImageCommmentByImageId()
 		{
 			if($this->get_request_method() != "POST")
 			{
@@ -199,13 +235,10 @@
 			}
 
 			if(isset($this->_request['image_id'])
-				&& isset($this->_request['commentor_id'])
-				&& !empty($this->_request['image_id'])
-				&& !empty($this->_request['commentor_id']))
+				&& !empty($this->_request['image_id']))
 			{
 				$image_id = $this->_request['image_id'];
-				$commentor_id = $this->_request['commentor_id'];
-				$query = mysqli_query($this->dbconnect(),"SELECT * FROM `image_comments` JOIN  WHERE `image_id`='$image_id' AND `commentor_id`='$commentor_id'");
+				$query = mysqli_query($this->dbconnect(),"SELECT * FROM `image_comments` WHERE `image_id`='$image_id'");
 				if($rec = mysqli_fetch_array($query))
 				{
 					$res = array('image_id'=> $rec['image_id'],
@@ -227,6 +260,144 @@
 			}
 		}	
 		
+		// imageLike
+		private function imageLike()
+		{
+			if($this->get_request_method() != "POST")
+			{
+				$res = array("status" => "false" , "message" => "Request Method Not Allowed");
+				$this->response($this->json($res),405);
+			}
+
+			if(isset($this->_request['image_id'])
+				&& isset($this->_request['user_id'])
+				&& !empty($this->_request['image_id'])
+				&& !empty($this->_request['user_id']))
+				{
+					$image_id = $this->_request['image_id'];
+					$user_id = $this->_request['user_id'];
+					$query = mysqli_query($this->dbconnect(),"INSERT INTO `image_like` (`image_id`,`user_id`) VALUES ('$image_id','$user_id')"); 
+					if($query > 0)
+					{
+						$res = array("status" => "false" , "message" => "Successfully Liked");
+						$this->response($this->json($res),200);
+					}
+					else
+					{
+						$res = array("status" => "false" , "message" => "Failed");
+						$this->response($this->json($res),200);
+					}
+				}
+				else
+				{
+					$res = array("status" => "false" , "message" => "Parameter Missing");
+					$this->response($this->json($res),200);
+				}
+		}
+
+		// getLikeByImageId
+		private function getLikeByImageId()
+		{
+			if($this->get_request_method() != "POST")
+			{
+				$res = array("status"=>"false" , "message" => "Request Method Not Allowed");
+				$this->response($this->json($res),405);
+			}
+
+			if(isset($this->_request['image_id'])
+				&& !empty($this->_request['image_id']))
+			{
+				$image_id = $this->_request['image_id'];
+				$query = mysqli_query($this->dbconnect(),"SELECT * FROM `image_like` WHERE `image_id`='$image_id'");
+				if($rec = mysqli_fetch_array($query))
+				{
+					$res = array('image_id'=> $rec['image_id'],
+								 'user_id' => $rec['user_id'],
+								 'created_at' => $rec['created_date']
+								 );
+					$this->response($this->json($res),200);
+				}
+				else
+				{
+					$res = array("status" => "false", "message"=>'Record Not Found');
+					$this->response($this->json($res),404);
+				}
+			}
+			else{
+				$res = array("status" => "false", "message"=>'Parameter Missing');
+				$this->response($this->json($res),200);
+			}
+		}
+
+		// getLikeByUserId
+		private function getLikeByUserId()
+		{
+			if($this->get_request_method() != "POST")
+			{
+				$res = array("status"=>"false" , "message" => "Request Method Not Allowed");
+				$this->response($this->json($res),405);
+			}
+
+			if(isset($this->_request['user_id'])
+				&& !empty($this->_request['user_id']))
+			{
+				$user_id = $this->_request['user_id'];
+				$query = mysqli_query($this->dbconnect(),"SELECT * FROM `image_like` WHERE `user_id`='$user_id'");
+				if($rec = mysqli_fetch_array($query))
+				{
+					$res = array('image_id'=> $rec['image_id'],
+								 'user_id' => $rec['user_id'],
+								 'created_at' => $rec['created_date']
+								 );
+					$this->response($this->json($res),200);
+				}
+				else
+				{
+					$res = array("status" => "false", "message"=>'Record Not Found');
+					$this->response($this->json($res),404);
+				}
+			}
+			else{
+				$res = array("status" => "false", "message"=>'Parameter Missing');
+				$this->response($this->json($res),200);
+			}
+		}
+
+		// getLikeByUserId
+		private function getLikeGroupBy()
+		{
+			if($this->get_request_method() != "POST")
+			{
+				$res = array("status"=>"false" , "message" => "Request Method Not Allowed");
+				$this->response($this->json($res),405);
+			}
+
+			if(isset($this->_request['user_id'])
+				&& !empty($this->_request['user_id']))
+			{
+				$user_id = $this->_request['user_id'];
+				$query = mysqli_query($this->dbconnect(),"SELECT * FROM `image_like` WHERE `user_id`='$user_id' GROUP BY `image_id` ");
+				if($rec = mysqli_fetch_array($query))
+				{
+					while($rec){
+						// $res = array('image_id'=> $rec['image_id'],
+						// 			 'user_id' => $rec['user_id'],
+						// 			 'created_at' => $rec['created_date']
+						// 			 );
+						$this->response($this->json($res),200);
+					}
+				}
+				else
+				{
+					$res = array("status" => "false", "message"=>'Record Not Found');
+					$this->response($this->json($res),404);
+				}
+			}
+			else{
+				$res = array("status" => "false", "message"=>'Parameter Missing');
+				$this->response($this->json($res),200);
+			}
+		}
 
 		// json
 		private function json($data)
